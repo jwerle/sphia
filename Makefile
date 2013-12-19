@@ -24,7 +24,7 @@ $(TESTS): CFLAGS += -g
 $(TESTS): $(DEPS_OBJS) $(OBJS)
 	@$(CC) $(CFLAGS) $(CPPFLAGS) $(?) $(@).c -o $(@) $(LDFLAGS)
 
-test: $(TESTS)
+test: clean $(TESTS)
 	@echo "\nRunning sphia tests"
 	@$(foreach e, $(TESTS:%.c=%), ./$(basename $(e)) && echo "  ✓ $(e)";)
 	@echo
