@@ -11,7 +11,8 @@
 
 #include <commander/commander.h>
 #include "options.h"
-#include "sphia.h"
+
+#define SPHIA_VERSION "0.0.9"
 
 // Function pointer to define functions for commands.
 typedef int (*cmd_func_t)(sphia_t *);

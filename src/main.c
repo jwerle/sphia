@@ -56,7 +56,7 @@ static void config_opt (command_t *);
 static void config_opt (command_t *self) {
   int rc = read_options(&opts, self->arg, 1);
   if (-1 == rc) {
-    sphia_db_error("Failed to read config path %s.", self->arg);
+    SPHIA_DB_ERROR("Failed to read config path %s.", self->arg);
   } else {
     opts.config = (char *)self->arg;
   }
@@ -70,20 +70,20 @@ GEN_CMD(get) {
   // $ sphia get --key foo --path ~db/
 
   if (NULL == opts.key) {
-    sphia_ferror("%s", "Missing '--key <name>' flag");
+    SPHIA_FERROR("%s", "Missing '--key <name>' flag");
     return 1;
   }
 
   opts.key = trim(opts.key);
   char *value = sphia_get(sphia, opts.key);
   if (NULL == value) {
-    char *msg = sp_error(sphia->db);
+    char *msg = sphia->error;
     if (NULL != msg) {
-      sphia_ferror("An error occured. %s", msg);
+      SPHIA_FERROR("An error occured. %s", msg);
       return 1;
     }
 
-    sphia_ferror("Couldn't find '%s'", opts.key);
+    SPHIA_FERROR("Couldn't find '%s'", opts.key);
     return 0;
   }
 
@@ -95,10 +95,10 @@ GEN_CMD(set) {
   // $ sphia set --key foo --value bar --path ~/db
 
   if (NULL == opts.key) {
-    sphia_ferror("%s", "Missing '--key <name>' flag");
+    SPHIA_FERROR("%s", "Missing '--key <name>' flag");
     return 1;
   } else if (NULL == opts.value) {
-    sphia_ferror("%s", "Missing '--value <value>' flag");
+    SPHIA_FERROR("%s", "Missing '--value <value>' flag");
     return 1;
   }
 
@@ -106,7 +106,7 @@ GEN_CMD(set) {
   opts.value = trim(opts.value);
   int rc = sphia_set(sphia, opts.key, opts.value);
   if (-1 == rc) {
-    sphia_ferror("An error occured setting key '%s'. %s", opts.key, sp_error(sphia->db));
+    SPHIA_FERROR("An error occured setting key '%s'. %s", opts.key, sphia->error);
     return 1;
   }
 
@@ -122,7 +122,7 @@ GEN_CMD(list) {
   }
 
   if (0 != _rc) {
-    sphia_db_error("%s\n", sp_error(sphia->db));
+    SPHIA_DB_ERROR("%s\n", sphia->error);
     return 1;
   }
 
@@ -135,9 +135,9 @@ GEN_CMD(remove) {
   int rc = sphia_rm(sphia, opts.key);
   if (-1 == rc) {
     if (NULL == opts.key) {
-      sphia_ferror("Error removing keys. %s", sp_error(sphia->db));
+      SPHIA_FERROR("Error removing keys. %s", sphia->error);
     } else {
-      sphia_ferror("Error removing key '%s'. %s", opts.key, sp_error(sphia->db));
+      SPHIA_FERROR("Error removing key '%s'. %s", opts.key, sphia->error);
     }
 
     return 1;
@@ -151,7 +151,7 @@ GEN_CMD(clear) {
 
   int rc = sphia_clear(sphia);
   if (-1 == rc) {
-    sphia_error("Failed to clear sophia database");
+    SPHIA_ERROR("Failed to clear sophia database");
     return 1;
   }
 
@@ -176,13 +176,13 @@ GEN_CMD(purge) {
 
   int rc = sphia_purge(opts.path);
   if (-1 == rc) {
-    sphia_error("Failed to purge database");
+    SPHIA_ERROR("Failed to purge database");
     return 1;
   }
 
   sphia = sphia_new(opts.path);
   if (NULL == sphia) {
-    sphia_error("Failed to purge database");
+    SPHIA_ERROR("Failed to purge database");
     return 1;
   }
 
@@ -196,13 +196,13 @@ GEN_CMD(reset) {
 
   int rc = sphia_reset(opts.path);
   if (-1 == rc) {
-    sphia_error("Failed to reset database");
+    SPHIA_ERROR("Failed to reset database");
     return 1;
   }
 
   sphia = sphia_new(opts.path);
   if (NULL == sphia) {
-    sphia_error("Failed to reset database");
+    SPHIA_ERROR("Failed to reset database");
     return 1;
   }
 
@@ -216,7 +216,7 @@ GEN_CMD(count) {
 
   int count = sphia_count(sphia);
   if (-1 == count) {
-    sphia_db_error("%s\n", sp_error(sphia->db));
+    SPHIA_DB_ERROR("%s\n", sphia->error);
     return 1;
   }
 
@@ -228,7 +228,7 @@ GEN_CMD(search) {
   // $ sphia search [--key <key>] [--value <value>]
 
   if (NULL == opts.key && NULL == opts.value) {
-    sphia_error("Missing '--key <key>' or '--value <value' flag to match");
+    SPHIA_ERROR("Missing '--key <key>' or '--value <value' flag to match");
     return 1;
   }
 
@@ -242,7 +242,7 @@ GEN_CMD(search) {
   if (NULL != opts.key) {
     key = strdup(opts.key);
     if (NULL == key) {
-      sphia_error("Unable to allocate memory");
+      SPHIA_ERROR("Unable to allocate memory");
       return 1;
     }
 
@@ -252,7 +252,7 @@ GEN_CMD(search) {
   if (NULL != opts.value) {
     value = strdup(opts.value);
     if (NULL == value) {
-      sphia_error("Unable to allocate memory");
+      SPHIA_ERROR("Unable to allocate memory");
       free(key);
       return 1;
     }
@@ -266,14 +266,14 @@ GEN_CMD(search) {
     int match = 0;
     tk = strdup(k);
     if (NULL == tk) {
-      sphia_error("Unable to allocate memory");
+      SPHIA_ERROR("Unable to allocate memory");
       free(key);
       free(value);
       return 1;
     }
     tv = strdup(v);
     if (NULL == tv) {
-      sphia_error("Unable to allocate memory");
+      SPHIA_ERROR("Unable to allocate memory");
       free(tk);
       free(key);
       free(value);
@@ -304,7 +304,7 @@ GEN_CMD(search) {
   }
 
   if (0 != _rc) {
-    sphia_db_error("%s\n", sp_error(sphia->db));
+    SPHIA_DB_ERROR("%s\n", sphia->error);
     free(key);
     free(value);
     return 1;
@@ -415,7 +415,7 @@ main (int argc, char *argv[]) {
 
   rc = parse_opts(&program, argc, argv);
   if (-1 == rc) {
-    sphia_error("Couldn't parse options");
+    SPHIA_ERROR("Couldn't parse options");
     return 1;
   }
 
@@ -438,7 +438,7 @@ main (int argc, char *argv[]) {
   if (NULL == opts.path) {
     opts.path = getcwd(tmp, sizeof(tmp));
     if (NULL == opts.path) {
-      sphia_error("Unable to get current directory");
+      SPHIA_ERROR("Unable to get current directory");
       rc = 1;
       goto cleanup;
     }
@@ -455,7 +455,7 @@ main (int argc, char *argv[]) {
       if (1 == cmds[i].open) {
         sphia = sphia_new(opts.path);
         if (NULL == sphia) {
-          sphia_ferror("Error initializing sophia database to path '%s'", opts.path);
+          SPHIA_FERROR("Error initializing sophia database to path '%s'", opts.path);
           rc = 1;
           goto cleanup;
         }
@@ -486,7 +486,7 @@ main (int argc, char *argv[]) {
 
   cargs = malloc(size);
   if (NULL == cargs) {
-    sphia_error("Unable to allocate memory");
+    SPHIA_ERROR("Unable to allocate memory");
     rc = 1;
     goto cleanup;
   }
@@ -507,7 +507,7 @@ main (int argc, char *argv[]) {
   sprintf(cexe, "sphia-%s", cmd);
   loc = which(trim(cexe));
   if (NULL == loc) {
-    sphia_ferror("'%s' not a sphia command.\nSee sphia --help for more information.", cmd);
+    SPHIA_FERROR("'%s' not a sphia command.\nSee sphia --help for more information.", cmd);
     rc = 1;
     free(cargs);
     goto cleanup;

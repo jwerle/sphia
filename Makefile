@@ -8,7 +8,7 @@ OBJS = $(filter-out src/main.o, $(patsubst %.c,%.o,$(wildcard src/*.c)))
 TESTS = $(patsubst %.c,%,$(wildcard test/*.c))
 CFLAGS += -std=c99 -Ideps -Wall -Wextra -march=native -fPIC -fvisibility=hidden
 CPPFLAGS += -D_BSD_SOURCE -DBIN_NAME='"$(BIN)"'
-LDFLAGS += -pthread -lsophia
+LDFLAGS += -pthread -lsophia -lsphia
 
 build: CFLAGS += -O2
 build: CPPFLAGS += -DNDEBUG
@@ -20,7 +20,6 @@ debug: src/main
 src/main: $(DEPS_OBJS) $(OBJS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(?) $(@).c -o $(BIN) $(LDFLAGS)
 
-$(TESTS): CFLAGS += -g
 $(TESTS): $(DEPS_OBJS) $(OBJS)
 	@$(CC) $(CFLAGS) $(CPPFLAGS) $(?) $(@).c -o $(@) $(LDFLAGS)
 
@@ -30,9 +29,11 @@ test: $(TESTS)
 travis:
 	git clone --depth=1 https://github.com/larzconwell/sophia.git sophia
 	$(MAKE) -C sophia/db
+	git clone --depth=1 https://github.com/sphia/libsphia.git libsphia
+	$(MAKE) -C libsphia/
 	mv sophia/db sophia/sophia
-	rm -f sophia/sophia/*.so*
-	CFLAGS="-Isophia/" LIBRARY_PATH="./sophia/sophia" $(MAKE) test
+	rm -f sophia/sophia/*.so* libsphia/*.so.*
+	CFLAGS="-Isophia/ -Ilibsphia/" LIBRARY_PATH="./sophia/sophia ./libsphia/include" $(MAKE) test
 
 install: $(MAN_FILES) build
 	mkdir -p $(PREFIX)/bin

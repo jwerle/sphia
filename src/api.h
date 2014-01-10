@@ -9,15 +9,12 @@
 #ifndef SPHIA_API_H
 #define SPHIA_API_H 1
 
-#include "get.h"
-#include "set.h"
-#include "rm.h"
+#include <sphia.h>
+#include "sphia-macro.h"
 #include "clear.h"
 #include "status.h"
 #include "purge.h"
 #include "reset.h"
-#include "count.h"
-#include "sphia.h"
 
 #endif
 
