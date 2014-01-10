@@ -6,7 +6,6 @@
 //
 
 
-#include "rm.h"
 #include "clear.h"
 
 int

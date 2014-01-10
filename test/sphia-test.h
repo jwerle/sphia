@@ -2,6 +2,9 @@
 #ifndef SPHIA_TEST_H
 #define SPHIA_TEST_H 1
 
+#include <sophia.h>
+#include <sp.h>
+#include <sphia.h>
 #include "../src/api.h"
 
 int __failed_assertions = 0;
